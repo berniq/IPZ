@@ -1,0 +1,66 @@
+#define DETECT 2    // pin 2 for sensor(detection)
+#define MOTOR_PIN_1 9   // pin 9 for motor_pin_1
+#define MOTOR_PIN_2 10  // pin 10 for motor_pin_2
+#define MOTOR_PIN_3 11  // pin 11 for motor_pin_3
+#define MOTOR_PIN_4 12  // pin 12 for motor_pin_4
+int step_number = 0;    //declaring flag of steps for motor
+void setup() {
+Serial.begin(9600);   //signal observation
+Serial.println("Cukiernik Test");
+pinMode(MOTOR_PIN_1, OUTPUT);   //define output pins
+pinMode(MOTOR_PIN_2, OUTPUT);     
+pinMode(MOTOR_PIN_3, OUTPUT);     
+pinMode(MOTOR_PIN_4, OUTPUT);     
+pinMode(DETECT, INPUT);   //define input pin
+}
+
+
+void loop() {
+int detected = digitalRead(DETECT);   // read laser sensor sygnal
+
+  if( detected == LOW)   //spin to win
+  {
+    Serial.println("No laser");
+    for(int a =0; a<1024; a++){
+    OneStep();
+    delay(2);
+    }
+  }else{
+  Serial.println("Detected!");
+  }
+  delay(200);
+}
+
+
+void OneStep(){
+switch(step_number){    //one step->rotation clockwise
+  case 0:
+  digitalWrite(MOTOR_PIN_1, LOW);
+  digitalWrite(MOTOR_PIN_2, LOW);
+  digitalWrite(MOTOR_PIN_3, LOW);
+  digitalWrite(MOTOR_PIN_4, HIGH);
+  break;
+  case 1:
+  digitalWrite(MOTOR_PIN_1, LOW);
+  digitalWrite(MOTOR_PIN_2, LOW);
+  digitalWrite(MOTOR_PIN_3, HIGH);
+  digitalWrite(MOTOR_PIN_4, LOW);
+  break;
+  case 2:
+  digitalWrite(MOTOR_PIN_1, LOW);
+  digitalWrite(MOTOR_PIN_2, HIGH);
+  digitalWrite(MOTOR_PIN_3, LOW);
+  digitalWrite(MOTOR_PIN_4, LOW);
+  break;
+  case 3:
+  digitalWrite(MOTOR_PIN_1, HIGH);
+  digitalWrite(MOTOR_PIN_2, LOW);
+  digitalWrite(MOTOR_PIN_3, LOW);
+  digitalWrite(MOTOR_PIN_4, LOW);
+  break;
+}
+step_number++;    //reseting step flag
+  if(step_number > 3){
+    step_number = 0;
+  }
+}
