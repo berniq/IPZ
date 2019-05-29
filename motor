@@ -7,19 +7,22 @@
 int step_number;    //declaring flag of steps for motor
 int z=1;    //declaring flag z that prevent motor from spining after starting
 int counter;    //counting number on steps
+int countera;  
+int counterb;  
 
 void setup() {
-Serial.begin(9600);   //signal observation
-Serial.println("Cukiernik Test");
+//Serial.begin(9600);   //signal observation
+//Serial.println("Cukiernik Test");
 pinMode(MOTOR_PIN_1, OUTPUT);   //define output pins
 pinMode(MOTOR_PIN_2, OUTPUT);     
 pinMode(MOTOR_PIN_3, OUTPUT);     
 pinMode(MOTOR_PIN_4, OUTPUT);     
 pinMode(DETECT, INPUT);   //define input pin
-counter = EEPROM.read(0);   //
-step_number = EEPROM.read(1);   //
+countera = EEPROM.read(1);   //
+counterb = EEPROM.read(2);    //  
+counter= counterb*255 + countera;   //
+step_number = EEPROM.read(0);   //
 }
-
 
 void loop() {  
 if (z==1){    //preventing microcontroler to do anything for 1s after starting
@@ -29,7 +32,7 @@ if (z==1){    //preventing microcontroler to do anything for 1s after starting
     if (counter != 0){
       for(int b =counter; b<1024; b++){
       OneStep();
-      delay(2);     
+      delay(2);   
       }
     Rezet();
     }else{
@@ -48,7 +51,6 @@ int detected = digitalRead(DETECT);   // read laser sensor sygnal
     }
   }
 }
-
 
 void OneStep(){
 switch(step_number){    //one step->rotation clockwise
@@ -78,18 +80,20 @@ switch(step_number){    //one step->rotation clockwise
   break;
 }
 step_number++;    //reseting step flag
-counter++;    //counting steps
-EEPROM.write(1, step_number);
-EEPROM.write(0, counter);   //saving information in eeprom
-Serial.println(counter);
-Serial.println(step_number);
+countera++;    //counting steps
+EEPROM.write(0, step_number);
+EEPROM.write(1, countera);   //saving information in eeprom
+//Serial.println(countera);
+//Serial.println(counterb);
+//Serial.println(step_number);
   if(step_number > 3){
     step_number = 0;
-    EEPROM.write(1, 0);
-  }
-  if(counter >1023){
-    counter = 0;
     EEPROM.write(0, 0);
+  }
+  if(countera >255){
+    countera = 1;
+    counterb++;
+    EEPROM.write(2, counterb);
   }
 }
 
@@ -98,4 +102,11 @@ void Rezet(){
   digitalWrite(MOTOR_PIN_2, LOW);
   digitalWrite(MOTOR_PIN_3, LOW);
   digitalWrite(MOTOR_PIN_4, LOW);
+  step_number = 0;
+  countera = 0;
+  counterb = 0;
+  counter = 0;
+  EEPROM.write(0, step_number);
+  EEPROM.write(1, countera);  
+  EEPROM.write(2, counterb);
 }
