@@ -1,9 +1,13 @@
+#include <EEPROM.h>
 #define DETECT 2    // pin 2 for sensor(detection)
-#define MOTOR_PIN_1 9   // pin 9 for motor_pin_1
-#define MOTOR_PIN_2 10  // pin 10 for motor_pin_2
-#define MOTOR_PIN_3 11  // pin 11 for motor_pin_3
-#define MOTOR_PIN_4 12  // pin 12 for motor_pin_4
-int step_number = 0;    //declaring flag of steps for motor
+#define MOTOR_PIN_1 12   // pin 12 for motor_pin_1
+#define MOTOR_PIN_2 11  // pin 11 for motor_pin_2
+#define MOTOR_PIN_3 10  // pin 10 for motor_pin_3
+#define MOTOR_PIN_4 9  // pin 9 for motor_pin_4
+int step_number;    //declaring flag of steps for motor
+int z=1;    //declaring flag z that prevent motor from spining after starting
+int counter;    //counting number on steps
+
 void setup() {
 Serial.begin(9600);   //signal observation
 Serial.println("Cukiernik Test");
@@ -12,23 +16,37 @@ pinMode(MOTOR_PIN_2, OUTPUT);
 pinMode(MOTOR_PIN_3, OUTPUT);     
 pinMode(MOTOR_PIN_4, OUTPUT);     
 pinMode(DETECT, INPUT);   //define input pin
+counter = EEPROM.read(0);   //
+step_number = EEPROM.read(1);   //
 }
 
 
-void loop() {
-int detected = digitalRead(DETECT);   // read laser sensor sygnal
-
-  if( detected == LOW)   //spin to win
-  {
-    Serial.println("No laser");
-    for(int a =0; a<1024; a++){
-    OneStep();
-    delay(2);
-    }
+void loop() {  
+if (z==1){    //preventing microcontroler to do anything for 1s after starting
+  delay(1000);
+  z=0;
   }else{
-  Serial.println("Detected!");
+    if (counter != 0){
+      for(int b =counter; b<1024; b++){
+      OneStep();
+      delay(2);     
+      }
+    Rezet();
+    }else{
+int detected = digitalRead(DETECT);   // read laser sensor sygnal
+      if( detected == LOW){   //spin to win   
+       //Serial.println("No laser");
+        for(int a =0; a<1024; a++){
+        OneStep();
+        delay(2);
+        }
+      Rezet();
+      }else{
+      //Serial.println("Detected!");
+      }
+      delay(200);
+    }
   }
-  delay(200);
 }
 
 
@@ -60,7 +78,24 @@ switch(step_number){    //one step->rotation clockwise
   break;
 }
 step_number++;    //reseting step flag
+counter++;    //counting steps
+EEPROM.write(1, step_number);
+EEPROM.write(0, counter);   //saving information in eeprom
+Serial.println(counter);
+Serial.println(step_number);
   if(step_number > 3){
     step_number = 0;
+    EEPROM.write(1, 0);
   }
+  if(counter >1023){
+    counter = 0;
+    EEPROM.write(0, 0);
+  }
+}
+
+void Rezet(){
+  digitalWrite(MOTOR_PIN_1, LOW);
+  digitalWrite(MOTOR_PIN_2, LOW);
+  digitalWrite(MOTOR_PIN_3, LOW);
+  digitalWrite(MOTOR_PIN_4, LOW);
 }
