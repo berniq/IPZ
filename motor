@@ -11,8 +11,8 @@ int countera;
 int counterb;  
 
 void setup() {
-//Serial.begin(9600);   //signal observation
-//Serial.println("Cukiernik Test");
+Serial.begin(9600);   //signal observation
+Serial.println("Cukiernik Test");
 pinMode(MOTOR_PIN_1, OUTPUT);   //define output pins
 pinMode(MOTOR_PIN_2, OUTPUT);     
 pinMode(MOTOR_PIN_3, OUTPUT);     
@@ -37,17 +37,17 @@ if (z==1){    //preventing microcontroler to do anything for 1s after starting
     Rezet();
     }else{
 int detected = digitalRead(DETECT);   // read laser sensor sygnal
-      if( detected == LOW){   //spin to win   
-       //Serial.println("No laser");
-        for(int a =0; a<1024; a++){
-        OneStep();
-        delay(2);
-        }
-      Rezet();
+      if( detected == HIGH){   //spin to win   
+       Serial.println("PRZERWANIE");
+       //for(int a =0; a<1024; a++){
+       // OneStep();
+        delay(20);
+       // }
+       Rezet();
       }else{
-      //Serial.println("Detected!");
+      Serial.println("JEST GIT!");
       }
-      delay(200);
+      delay(20);
     }
   }
 }
